@@ -43,8 +43,11 @@ exports.stream = function (input) {
     
     var offset = null;
     function dispatch () {
-        // 
-        if (caughtEnd && (!pending || buffers.length === 0)) {
+        if (!pending) {
+            if (caughtEnd) done = true;
+            return;
+        }
+        if (caughtEnd && buffers.length === 0) {
             done = true;
             return;
         }
