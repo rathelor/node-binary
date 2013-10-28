@@ -47,10 +47,6 @@ exports.stream = function (input) {
             if (caughtEnd) done = true;
             return;
         }
-        if (caughtEnd) {
-            buffers.length = 0;
-            return pending.cb(buffers);
-        }
         if (typeof pending === 'function') {
             pending();
         }
@@ -78,6 +74,10 @@ exports.stream = function (input) {
                 else {
                     pending.cb(buf);
                 }
+            }
+            else if (caughtEnd) {
+                buffers.length = 0;
+                return pending.cb(buffers);
             }
         }
     }
@@ -184,8 +184,14 @@ exports.stream = function (input) {
                     next();
                     dispatch();
                 } else {
-                    i = Math.max(buffers.length - search.length - offset - taken, 0);
-				}
+                    if (caughtEnd) {
+                        next();
+                        dispatch();
+                    }
+                    else {
+                        i = Math.max(buffers.length - search.length - offset - taken, 0);
+                    }
+                }				}
                 taken += i;
             };
             dispatch();
