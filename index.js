@@ -47,9 +47,9 @@ exports.stream = function (input) {
             if (caughtEnd) done = true;
             return;
         }
-        if (caughtEnd && buffers.length === 0) {
-            done = true;
-            return;
+        if (caughtEnd) {
+            buffers.length = 0;
+            return pending.cb(buffers);
         }
         if (typeof pending === 'function') {
             pending();
@@ -338,38 +338,58 @@ exports.parse = function parse (buffer) {
 
 // convert byte strings to unsigned little endian numbers
 function decodeLEu (bytes) {
-    var acc = 0;
-    for (var i = 0; i < bytes.length; i++) {
-        acc += Math.pow(256,i) * bytes[i];
+    if (bytes.length > 0) {
+        var acc = 0;
+        for (var i = 0; i < bytes.length; i++) {
+            acc += Math.pow(256,i) * bytes[i];
+        }
+        return acc;
     }
-    return acc;
+    else {
+        return null;
+    }
 }
 
 // convert byte strings to unsigned big endian numbers
 function decodeBEu (bytes) {
-    var acc = 0;
-    for (var i = 0; i < bytes.length; i++) {
-        acc += Math.pow(256, bytes.length - i - 1) * bytes[i];
+    if (bytes.length > 0) {
+        var acc = 0;
+        for (var i = 0; i < bytes.length; i++) {
+            acc += Math.pow(256, bytes.length - i - 1) * bytes[i];
+        }
+        return acc;
     }
-    return acc;
+    else {
+        return null;
+    }
 }
 
 // convert byte strings to signed big endian numbers
 function decodeBEs (bytes) {
-    var val = decodeBEu(bytes);
-    if ((bytes[0] & 0x80) == 0x80) {
-        val -= Math.pow(256, bytes.length);
+    if (bytes.length > 0) {
+        var val = decodeBEu(bytes);
+        if ((bytes[0] & 0x80) == 0x80) {
+            val -= Math.pow(256, bytes.length);
+        }
+        return val;
     }
-    return val;
+    else {
+        return null;
+    }
 }
 
 // convert byte strings to signed little endian numbers
 function decodeLEs (bytes) {
-    var val = decodeLEu(bytes);
-    if ((bytes[bytes.length - 1] & 0x80) == 0x80) {
-        val -= Math.pow(256, bytes.length);
+    if (bytes.length > 0) {
+        var val = decodeLEu(bytes);
+        if ((bytes[bytes.length - 1] & 0x80) == 0x80) {
+            val -= Math.pow(256, bytes.length);
+        }
+        return val;
     }
-    return val;
+    else {
+        return null;
+    }
 }
 
 function words (decode) {
