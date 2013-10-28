@@ -191,7 +191,7 @@ exports.stream = function (input) {
                     else {
                         i = Math.max(buffers.length - search.length - offset - taken, 0);
                     }
-                }				}
+                }
                 taken += i;
             };
             dispatch();
